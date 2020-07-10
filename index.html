@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>魔方墙找茬</title>
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    </head>
+    <body>
+        <div id="app">
+            <label>边长：</label><el-input-number size="small" v-model="num" :min="3" :max="300" :step="3" step-strictly label="边长"></el-input-number>
+            <label style="margin-left: 30px;">不同个数：</label><el-input-number size="small" v-model="unlike" :min="1" :max=num*num :step="1" step-strictly label="不同"></el-input-number>
+            <el-button style="margin-left: 30px;" size="small" type="primary" @click="repaint" round>生成</el-button>
+            <el-button size="small" type="primary" @click="tip" round>提示</el-button>
+        </div>
+        <div style="height: 30px;">
+            
+        </div>
+        <div>
+            <canvas id="myCanvas" width="630" height="320" style="background: #d3d3d3;"></canvas>
+        </div>
+    </body>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                num: 3,
+                unlike: 1,
+                unlikeNo: [],
+                color: ['red', 'green', 'blue', 'orange', 'yellow', 'white'],
+                colorlist: []
+            },
+            methods: {
+                repaint() {
+                    this.colorlist.length = this.unlikeNo.length = 0
+                    var c = document.getElementById("myCanvas");
+                    var ctx = c.getContext("2d");
+                    var len = 300 / this.num
+                    var index = 0
+
+                    var again = 0
+                    //清空画布
+                    ctx.clearRect(0, 0, c.width, c.height);
+                    for (let i = 0; i < this.num; i++) {
+                        for (let j = 0; j < this.num; j++) {
+                            let rand = this.randomNum(0, 5)
+                            this.colorlist.push(rand)
+                            ctx.fillStyle = this.color[rand];
+                            ctx.fillRect(10 + len * j, 10 + len * i, len, len);
+                        }
+                    };
+                    //随机改变N个颜色
+                    for (let i = 0; i < this.unlike; i++) {
+                        //确保不重复改变
+                        var changeRand = this.randomNum(0, this.colorlist.length - 1)
+                        for (let j = 0; j < this.unlikeNo.length; j--) {
+                            changeRand = this.randomNum(0, this.colorlist.length - 1)
+                            if (this.unlikeNo.some(function(No) {
+                                    return No == changeRand
+                                })) {
+                                console.log('again!' + again++);
+                            } else {
+                                break
+                            }
+                        }
+                        this.unlikeNo.push(changeRand)
+
+                        if (this.colorlist[this.unlikeNo[i]] == 5) {
+                            this.colorlist[this.unlikeNo[i]] = this.colorlist[this.unlikeNo[i]] - this.randomNum(
+                                1, 5);
+                        } else if (this.colorlist[this.unlikeNo[i]] == 0) {
+                            this.colorlist[this.unlikeNo[i]] = this.colorlist[this.unlikeNo[i]] + this.randomNum(
+                                1, 5);
+                        } else {
+                            this.colorlist[this.unlikeNo[i]] = this.colorlist[this.unlikeNo[i]] + 1;
+                        }
+                    }
+
+                    for (let i = 0; i < this.num; i++) {
+                        for (let j = 0; j < this.num; j++) {
+                            //let rand = this.randomNum(0, 5)
+                            ctx.fillStyle = this.color[this.colorlist[index++]];
+                            ctx.fillRect(320 + len * j, 10 + len * i, len, len);
+                        }
+                    }
+                },
+
+                tip() {
+                    var ctx = document.getElementById("myCanvas").getContext("2d");
+                    var len = 300 / this.num
+                    ctx.fillStyle = "black";
+                    if (this.unlikeNo.length == 0) {
+                        alert("请生成魔方墙")
+                    } else {
+                        for (let i = 0; i < this.unlikeNo.length; i++) {
+                            //console.log(this.unlikeNo[0]);
+                            var s = Math.floor(this.unlikeNo[i] / this.num)
+                            //console.log(s);
+                            var y = this.unlikeNo[i] % this.num
+                            //console.log(y);
+                            ctx.beginPath();
+                            ctx.arc(10 + len * y + len/2, 10 + len * s + len/2,len/2,0,2*Math.PI);
+                            ctx.stroke();
+                            ctx.beginPath();
+                            ctx.arc(320 + len * y + len/2, 10 + len * s + len/2,len/2,0,2*Math.PI);
+                            ctx.stroke();
+                            //ctx.fillRect(10 + len * y + 5, 10 + len * s + 5, len - 10, len - 10);
+                            //ctx.fillRect(320 + len * y + 5, 10 + len * s + 5, len - 10, len - 10);
+                        }
+                    }
+                },
+
+                //生成从minNum到maxNum的随机数
+                randomNum(minNum, maxNum) {
+                    switch (arguments.length) {
+                        case 1:
+                            return parseInt(Math.random() * minNum + 1, 10);
+                            break;
+                        case 2:
+                            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+                            //或者 Math.floor(Math.random()*( maxNum - minNum + 1 ) + minNum );
+                            break;
+                        default:
+                            return 0;
+                            break;
+                    }
+                }
+            }
+        })
+    </script>
+</html>
