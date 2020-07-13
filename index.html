@@ -7,17 +7,22 @@
     </head>
     <body>
         <div id="app">
-            <label>边长：</label><el-input-number size="small" v-model="num" :min="3" :max="300" :step="3" step-strictly label="边长"></el-input-number>
-            <label style="margin-left: 30px;">不同个数：</label><el-input-number size="small" v-model="unlike" :min="1" :max=num*num :step="1" step-strictly label="不同"></el-input-number>
-            <el-button style="margin-left: 30px;" size="small" type="primary" @click="repaint" round>生成</el-button>
-            <el-button size="small" type="primary" @click="tip" round>提示</el-button>
+            <div>
+                <label>边长：</label>
+                <el-input-number size="small" v-model="num" :min="3" :max="300" :step="3" step-strictly label="边长"></el-input-number>
+                <label style="margin-left: 30px;">不同个数：</label>
+                <el-input-number size="small" v-model="unlike" :min="1" :max=num*num :step="1" step-strictly label="不同"></el-input-number>
+                <el-button style="margin-left: 30px;" size="small" type="primary" @click="repaint" round>生成</el-button>
+                <el-button size="small" type="primary" @click="tip" round>提示</el-button>
+            </div>
+            <div style="height: 30px;">
+
+            </div>
+            <div @click="getxy">
+                <canvas id="myCanvas" width="630" height="320" style="background: #d3d3d3;"></canvas>
+            </div>
         </div>
-        <div style="height: 30px;">
-            
-        </div>
-        <div>
-            <canvas id="myCanvas" width="630" height="320" style="background: #d3d3d3;"></canvas>
-        </div>
+
     </body>
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
@@ -100,14 +105,39 @@
                             var y = this.unlikeNo[i] % this.num
                             //console.log(y);
                             ctx.beginPath();
-                            ctx.arc(10 + len * y + len/2, 10 + len * s + len/2,len/2,0,2*Math.PI);
+                            ctx.arc(10 + len * y + len / 2, 10 + len * s + len / 2, len / 2, 0, 2 * Math.PI);
                             ctx.stroke();
                             ctx.beginPath();
-                            ctx.arc(320 + len * y + len/2, 10 + len * s + len/2,len/2,0,2*Math.PI);
+                            ctx.arc(320 + len * y + len / 2, 10 + len * s + len / 2, len / 2, 0, 2 * Math.PI);
                             ctx.stroke();
+                            //点黑点
                             //ctx.fillRect(10 + len * y + 5, 10 + len * s + 5, len - 10, len - 10);
                             //ctx.fillRect(320 + len * y + 5, 10 + len * s + 5, len - 10, len - 10);
                         }
+                    }
+                },
+                getxy(e) { //获取鼠标在canvas上的坐标
+                    var canvas = document.getElementById("myCanvas")
+                    var rect = canvas.getBoundingClientRect();
+                    var leftB = parseInt(document.defaultView.getComputedStyle(canvas).borderLeftWidth); //获取的是样式，需要转换为数值
+                    var topB = parseInt(document.defaultView.getComputedStyle(canvas).borderTopWidth);
+                    var x = (e.clientX - rect.left) - leftB
+                    var y = (e.clientY - rect.top) - topB
+                    var len = 300 / this.num
+                    var shang = Math.floor(this.unlikeNo[0] / this.num)
+                    var yu = this.unlikeNo[0] % this.num
+                    if ((x > 10 + len * yu) && (x < 10 + len * yu + len) || (x > 320 + len * yu) && (x < 320 + len * yu + len)) {
+                        if (y > 10 + len * shang && y < 10 + len * shang + len) {
+                            this.num = this.num + 3
+                            alert('successful!')
+                            this.repaint()
+                        } else {
+                            alert('fail!')
+                            this.repaint()
+                        }
+                    } else {
+                        alert('fail!')
+                        this.repaint()
                     }
                 },
 
